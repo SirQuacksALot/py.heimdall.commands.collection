@@ -20,8 +20,6 @@ class AutoChannelManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._init_db()
-        print(f"With voice intent: {self.bot.intents.voice_states}")
-        print(f"With voice intent: {self.bot.intents.members}")
 
     def _init_db(self):
         conn = sqlite3.connect(DB_PATH)
