@@ -6,7 +6,6 @@ from discord import app_commands
 from discord.ext import commands
 
 DB_PATH = "data/channels.db"
-ADMIN_PERMISSIONS = discord.Permissions(administrator=True)
 
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -45,7 +44,7 @@ class AutoChannelManager(commands.Cog):
 
     @app_commands.command(name="add_channel_listener", description="Fügt einen neuen Auto Voice Channel Listener hinzu.")
     @app_commands.describe(channel="Voice Channel ID")
-    @app_commands.default_permissions(ADMIN_PERMISSIONS)
+    @app_commands.default_permissions()
     async def add_channel_listener(self, interaction: discord.Interaction, channel: discord.VoiceChannel):
         try:
             conn = sqlite3.connect(DB_PATH)
@@ -74,7 +73,7 @@ class AutoChannelManager(commands.Cog):
     
     @app_commands.command(name="remove_channel_listener", description="Entfernt einen gespeicherten Join-Voice-Channel.")
     @app_commands.describe(channel="Der Channel, der entfernt werden soll")
-    @app_commands.default_permissions(ADMIN_PERMISSIONS)
+    @app_commands.default_permissions()
     async def remove_channel_listener(self, interaction: discord.Interaction, channel: discord.VoiceChannel):
         try:
             conn = sqlite3.connect(DB_PATH)

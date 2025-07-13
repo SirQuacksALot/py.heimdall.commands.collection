@@ -2,15 +2,13 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-ADMIN_PERMISSIONS = discord.Permissions(administrator=True)
-
 class DebugTools(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(name="delete_message", description="Löscht eine nachricht anhand einer Message ID.")
     @app_commands.describe(message_id="Die ID der Nachricht, die gelöscht werden soll")
-    @app_commands.default_permissions(ADMIN_PERMISSIONS)
+    @app_commands.default_permissions()
     async def delete_message(self, interaction: discord.Interaction, message_id: str):
         channel = interaction.channel
 
