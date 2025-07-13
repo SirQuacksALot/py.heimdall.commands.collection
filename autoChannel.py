@@ -1,10 +1,13 @@
 import sqlite3
 import discord
 import traceback
+# import logging
 from discord import app_commands
 from discord.ext import commands
 
-DB_PATH = "app/channels.db"
+DB_PATH = "data/channels.db"
+
+# logging.basicConfig(level=logging.DEBUG)
 
 class AutoChannelManager(commands.Cog):
 
@@ -17,6 +20,8 @@ class AutoChannelManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._init_db()
+        print(f"With voice intent: {self.bot.intents.voice_states}")
+        print(f"With voice intent: {self.bot.intents.members}")
 
     def _init_db(self):
         conn = sqlite3.connect(DB_PATH)
@@ -48,12 +53,14 @@ class AutoChannelManager(commands.Cog):
             if c.fetchone():
                 await interaction.response.send_message("⚠️ Dieser Channel ist bereits als Auto-Voice-Channel gespeichert.", ephemeral=True)
                 conn.close()
+                print(f"⚠️ **{channel.name}** Channel ist bereits als Auto-Voice-Channel gespeichert.")
                 return
 
             c.execute('INSERT OR IGNORE INTO auto_voice_channels (guild_id, channel_id) VALUES (?, ?)', (interaction.guild.id, channel.id))
             conn.commit()
             conn.close()
             await interaction.response.send_message(f"✅ Listener für channel **{channel.name}** hinzugefügt", ephemeral=True)
+            print(f"✅ Listener für channel **{channel.name}** hinzugefügt")
         
         except Exception as e:
             print("❌ Fehler beim Entfernen des Join-Channels:")
@@ -74,6 +81,7 @@ class AutoChannelManager(commands.Cog):
             if not c.fetchone():
                 await interaction.response.send_message("⚠️ Dieser Channel ist nicht als Auto-Voice-Channel gespeichert.", ephemeral=True)
                 conn.close()
+                print(f"⚠️ **{channel.name}** Channel ist nicht als Auto-Voice-Channel gespeichert.")
                 return
             
             c.execute("DELETE FROM auto_voice_channels WHERE guild_id = ? AND channel_id = ?", (interaction.guild.id, channel.id))
@@ -81,6 +89,7 @@ class AutoChannelManager(commands.Cog):
             conn.close()
 
             await interaction.response.send_message(f"✅ Auto-Voice-Channel **{channel.name}** wurde entfernt.", ephemeral=True)
+            print(f"✅ Auto-Voice-Channel **{channel.name}** wurde entfernt.")
 
         except Exception as e:
             print("❌ Fehler beim Entfernen des Join-Channels:")
@@ -98,6 +107,7 @@ class AutoChannelManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
+        print(f"🔥 on_voice_state_update event fired!")
         if before.channel == after.channel:
             return
 
@@ -123,7 +133,7 @@ class AutoChannelManager(commands.Cog):
             await member.move_to(new_channel)
 
         # Prüfen, ob vorheriger temporärer Channel leer ist → löschen
-        if len(before.channel.members) == 0 and before.channel.name.startswith("︱🎙️ of"):
+        if before.channel and len(before.channel.members) == 0 and before.channel.name.startswith("︱🎙️ of"):
             try:
                 await before.channel.delete()
             except Exception as e:
